@@ -9,8 +9,10 @@ import by.leshok.util.CarUtil;
 import by.leshok.util.Util;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -259,8 +261,26 @@ public class Main {
 
         CarUtil.printTotalSum(turSum, uzbSum, kazSum, kyrSum, rusSum, monSum);
     }
+
     private static void task15() throws IOException {
+        double WATER_PRICE_PER_CUBIC_METER = 1.39;
+        LocalDate currentTime = LocalDate.now();
+        LocalDate past = currentTime.minusYears(5);
+
         List<Flower> flowers = Util.getFlowers();
-        //        Продолжить...
+        double totalFlowersPrice = flowers.stream()
+                .sorted(Comparator.comparing(Flower::getOrigin).reversed())
+                .sorted(Comparator.comparing(Flower::getPrice).reversed())
+                .sorted(Comparator.comparing(Flower::getWaterConsumptionPerDay).reversed())
+                .filter(flower -> flower.getCommonName().charAt(0) > 'C'
+                        && flower.getCommonName().charAt(0) < 'S')
+                .mapToDouble(flower -> flower.getPrice() +
+                        (flower.getWaterConsumptionPerDay()
+                                * ChronoUnit.DAYS.between(past, currentTime)
+                                * WATER_PRICE_PER_CUBIC_METER) / 1000)
+                .sum();
+
+//        totalFlowersPrice = Double.parseDouble(String.format(new DecimalFormat("#.##").format(totalFlowersPrice)));
+        System.out.println(String.format("%.2f$", totalFlowersPrice));
     }
 }
